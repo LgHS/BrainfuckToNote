@@ -4,10 +4,7 @@ using System;
 
 namespace BrainfuckToNote
 {
-
-	namespace WavePlayback
-	{
-		class SineWaveOscillator : WaveProvider16
+	class SineWaveOscillator : WaveProvider16
 	{
 		double phaseAngle;
 		public EnvelopeGenerator envelope = new EnvelopeGenerator();

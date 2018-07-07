@@ -2,10 +2,7 @@
 
 namespace BrainfuckToNote
 {
-
-	namespace WavePlayback
-	{
-		public abstract class WaveProvider32 : IWaveProvider
+	public abstract class WaveProvider32 : IWaveProvider
 	{
 		private WaveFormat waveFormat;
 

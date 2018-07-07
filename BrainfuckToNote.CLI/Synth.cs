@@ -1,5 +1,4 @@
-﻿using BackFuck;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,10 +12,10 @@ namespace BrainfuckToNote
 		private WaveOut triangleOut = new WaveOut();
 		private WaveOut squareOut = new WaveOut();
 
-		WavePlayback.SineWaveProvider32 sineWave = new WavePlayback.SineWaveProvider32();
-		WavePlayback.SawWaveProvider32 sawWave = new WavePlayback.SawWaveProvider32();
-		WavePlayback.SquareWaveProvider32 squareWave = new WavePlayback.SquareWaveProvider32();
-		WavePlayback.TriangleWaveProvider32 triangleWave = new WavePlayback.TriangleWaveProvider32();
+		SineWaveProvider32 sineWave = new SineWaveProvider32();
+		SawWaveProvider32 sawWave = new SawWaveProvider32();
+		SquareWaveProvider32 squareWave = new SquareWaveProvider32();
+		TriangleWaveProvider32 triangleWave = new TriangleWaveProvider32();
 
 		float freq;
 		bool playing = false;
@@ -30,15 +29,14 @@ namespace BrainfuckToNote
 
 		public void StopWave()
 		{
-			//sineWave.envelope.Gate(false);
 			sineOut.Stop();
 			sawOut.Stop();
 			squareOut.Stop();
 			triangleOut.Stop();
 			playing = false;
+		}
 
-
-			public double GetFrequency(Note note)
+		public double GetFrequency(Note note)
 			{
 				if (note.Alteration == Alteration.Flat)
 				{
@@ -71,95 +69,93 @@ namespace BrainfuckToNote
 				return result;
 			}
 
-			public void PlayWave(double _frequency)
+		public void PlayWave(double _frequency)
+		{
+			if (wave == "sine")
 			{
-				if (wave == "sine")
-				{
-					sineWave.Frequency = (float)_frequency;
+				sineWave.Frequency = (float)_frequency;
 
-					if (sineOut.PlaybackState == PlaybackState.Stopped)
-					{
-						//sineWave.envelope.Gate(true);
-						sineOut.Play();
-					}
-					else
-					{
-						sineOut.Resume();
-					}
-				}
-				else if (wave == "saw")
+				if (sineOut.PlaybackState == PlaybackState.Stopped)
 				{
-					sawWave.Frequency = (float)_frequency;
-
-					if (sawOut.PlaybackState == PlaybackState.Stopped)
-						sawOut.Play();
-					else
-						sawOut.Resume();
+					sineOut.Play();
 				}
-				else if (wave == "square")
+				else
 				{
-					squareWave.Frequency = (float)_frequency;
-
-					if (squareOut.PlaybackState == PlaybackState.Stopped)
-					{
-						squareOut.Play();
-					}
-					else
-						squareOut.Resume();
+					sineOut.Resume();
 				}
-				else if (wave == "triangle")
-				{
-					triangleWave.Frequency = (float)_frequency;
-
-					if (triangleOut.PlaybackState == PlaybackState.Stopped)
-						triangleOut.Play();
-					else
-						triangleOut.Resume();
-				}
-				playing = true;
 			}
-
-			public void InitWaves()
+			else if (wave == "saw")
 			{
-				sineWave.SetWaveFormat(44100, 2);
-				sineWave.Frequency = (float)0;
-				sineWave.Amplitude = .9f;
-				sineOut.Init(sineWave);
+				sawWave.Frequency = (float)_frequency;
 
-				sawWave.SetWaveFormat(44000, 2);
-				sawWave.Frequency = (float)0;
-				sawWave.Amplitude = .3f;
-				sawOut.Init(sawWave);
-
-				squareWave.SetWaveFormat(44100, 2);
-				squareWave.Frequency = (float)0;
-				squareWave.Amplitude = .3f;
-				squareOut.Init(squareWave);
-
-				triangleWave.SetWaveFormat(44000, 2);
-				triangleWave.Frequency = (float)0;
-				triangleWave.Amplitude = 1f;
-				triangleOut.Init(triangleWave);
+				if (sawOut.PlaybackState == PlaybackState.Stopped)
+					sawOut.Play();
+				else
+					sawOut.Resume();
 			}
-
-			public void SetFrequency(float _freq)
+			else if (wave == "square")
 			{
-				if (wave == "sine")
+				squareWave.Frequency = (float)_frequency;
+
+				if (squareOut.PlaybackState == PlaybackState.Stopped)
 				{
-					sineWave.Frequency = _freq;
+					squareOut.Play();
 				}
-				else if (wave == "square")
-				{
-					squareWave.Frequency = _freq;
-				}
-				else if (wave == "triangle")
-				{
-					triangleWave.Frequency = _freq;
-				}
-				else if (wave == "saw")
-				{
-					sawWave.Frequency = _freq;
-				}
+				else
+					squareOut.Resume();
+			}
+			else if (wave == "triangle")
+			{
+				triangleWave.Frequency = (float)_frequency;
+
+				if (triangleOut.PlaybackState == PlaybackState.Stopped)
+					triangleOut.Play();
+				else
+					triangleOut.Resume();
+			}
+			playing = true;
+		}
+
+		public void InitWaves()
+		{
+			sineWave.SetWaveFormat(44100, 2);
+			sineWave.Frequency = (float)0;
+			sineWave.Amplitude = .9f;
+			sineOut.Init(sineWave);
+
+			sawWave.SetWaveFormat(44000, 2);
+			sawWave.Frequency = (float)0;
+			sawWave.Amplitude = .3f;
+			sawOut.Init(sawWave);
+
+			squareWave.SetWaveFormat(44100, 2);
+			squareWave.Frequency = (float)0;
+			squareWave.Amplitude = .3f;
+			squareOut.Init(squareWave);
+
+			triangleWave.SetWaveFormat(44000, 2);
+			triangleWave.Frequency = (float)0;
+			triangleWave.Amplitude = 1f;
+			triangleOut.Init(triangleWave);
+		}
+
+		public void SetFrequency(float _freq)
+		{
+			if (wave == "sine")
+			{
+				sineWave.Frequency = _freq;
+			}
+			else if (wave == "square")
+			{
+				squareWave.Frequency = _freq;
+			}
+			else if (wave == "triangle")
+			{
+				triangleWave.Frequency = _freq;
+			}
+			else if (wave == "saw")
+			{
+				sawWave.Frequency = _freq;
 			}
 		}
 	}

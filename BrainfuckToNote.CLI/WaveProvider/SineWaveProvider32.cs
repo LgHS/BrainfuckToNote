@@ -3,10 +3,7 @@ using System;
 
 namespace BrainfuckToNote
 {
-
-	namespace WavePlayback
-	{
-		public class SineWaveProvider32 : WaveProvider32
+	public class SineWaveProvider32 : WaveProvider32
 	{
 		double phaseAngle;
 

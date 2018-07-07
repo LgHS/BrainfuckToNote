@@ -2,10 +2,7 @@
 
 namespace BrainfuckToNote
 {
-
-	namespace WavePlayback
-	{
-		public class SawWaveProvider32 : WaveProvider32
+	public class SawWaveProvider32 : WaveProvider32
 	{
 		double phaseAngle;
 
@@ -26,8 +23,6 @@ namespace BrainfuckToNote
 				buffer[n + offset] = (float)(Amplitude * ((phaseAngle % 1.0) * 2 - 1));
 				if (this.WaveFormat.Channels == 1 || (n + offset) % 2 == 0)
 					phaseAngle += (Frequency / sampleRate);
-				//if (phaseAngle > 2 * Math.PI)
-				//    phaseAngle -= 2 * Math.PI;
 			}
 			return sampleCount;
 		}
