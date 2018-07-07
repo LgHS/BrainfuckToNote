@@ -1,9 +1,8 @@
-﻿/*
- * FORKED FROM by https://HelloACM.com Dr Zhihua Lai
-*/
+﻿using BrainfuckToNote;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace BackFuck
 {
@@ -97,9 +96,12 @@ namespace BackFuck
 				i++;
 			}
 
-			foreach(var n in notes)
+			Synth synth = new Synth();
+			foreach (var n in notes)
 			{
 				Console.WriteLine("{0}{1}", n.Pitch, n.Ocatve);
+				Thread.Sleep(50);
+				synth.PlayWave(synth.GetFrequency(n));
 			}
 		}
 
