@@ -43,50 +43,38 @@ namespace BackFuck
 			int i = 0;
 			int right = s.Length;
 			Note note = new Note();
+			note.Ocatve = 3;
 			while (i < right)
 			{
-
 				switch (s[i])
 				{
 					case '>':
-						{
-							note.Pitch = Notes.Do;
-							break;
-						}
+						note.Pitch = Notes.Do;
+						break;
 					case '<':
-						{
-							note.Pitch = Notes.Re;
-							break;
-						}
+						note.Pitch = Notes.Re;
+						break;
 					case '.':
-						{
-							note.Pitch = Notes.Mi;
-							break;
-						}
+						note.Pitch = Notes.Mi;
+						break;
 					case '+':
-						{
-							note.Pitch = Notes.Fa;
-							break;
-						}
+						note.Pitch = Notes.Fa;
+						break;
 					case '-':
-						{
-							note.Pitch = Notes.Sol;
-							break;
-						}
+						note.Pitch = Notes.Sol;
+						break;
 					case ',':
-						{
-							note.Pitch = Notes.La;
-							break;
-						}
+						note.Pitch = Notes.La;
+						break;
 					case '[':
 					case ']':
-						{
-							note.Pitch = Notes.Si;
-							break;
-						}
+						note.Pitch = Notes.Si;
+						break;
 				}
 
-				note.Ocatve += 1;
+				if(note.Ocatve < 8)
+					note.Ocatve += 1;
+						
 
 				if (i > 1 && s[i] != s[i - 1])
 				{
@@ -103,6 +91,7 @@ namespace BackFuck
 				Thread.Sleep(50);
 				synth.PlayWave(synth.GetFrequency(n));
 			}
+			synth.StopWave();
 		}
 
 		static void Main(string[] args)
