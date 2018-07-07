@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BachFuck": {
+      "commandName": "Project",
+      "commandLineArgs": "sample.txt"
+    }
+  }
+}
