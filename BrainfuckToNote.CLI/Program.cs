@@ -88,10 +88,10 @@ namespace BrainfuckToNote
 			foreach (var n in notes)
 			{
 				Console.WriteLine("{0}{1}", n.Pitch, n.Ocatve);
-				Thread.Sleep(50);
+				synth.StopWave();
 				synth.PlayWave(synth.GetFrequency(n));
+				Thread.Sleep(100);
 			}
-			synth.StopWave();
 		}
 
 		static void Main(string[] args)
