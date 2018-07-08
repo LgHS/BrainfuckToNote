@@ -85,12 +85,13 @@ namespace BrainfuckToNote
 			}
 
 			Synth synth = new Synth();
+			synth.SetSynthType(WaveType.square);
 			foreach (var n in notes)
 			{
 				Console.WriteLine("{0}{1}", n.Pitch, n.Ocatve);
-				synth.StopWave();
 				synth.PlayWave(synth.GetFrequency(n));
-				Thread.Sleep(100);
+				Thread.Sleep(200);
+				synth.StopWave();
 			}
 		}
 

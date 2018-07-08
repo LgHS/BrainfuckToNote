@@ -55,6 +55,7 @@
     <Compile Include="Synth.cs" />
     <Compile Include="WaveProvider\TriangleWaveProvider32.cs" />
     <Compile Include="WaveProvider\WaveProvider32.cs" />
+    <Compile Include="WaveRecorder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

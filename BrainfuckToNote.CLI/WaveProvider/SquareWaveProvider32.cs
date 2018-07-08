@@ -4,7 +4,7 @@ using System;
 
 namespace BrainfuckToNote
 {
-	public class SquareWaveProvider32 : WaveProvider32
+	public class SquareWaveProvider32 : WaveProvider32, ISampleProvider
 	{
 		double phaseAngle;
 		public EnvelopeGenerator envelope = new EnvelopeGenerator();

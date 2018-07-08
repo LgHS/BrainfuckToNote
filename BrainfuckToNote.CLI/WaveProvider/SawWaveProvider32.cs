@@ -2,7 +2,7 @@
 
 namespace BrainfuckToNote
 {
-	public class SawWaveProvider32 : WaveProvider32
+	public class SawWaveProvider32 : WaveProvider32, ISampleProvider
 	{
 		double phaseAngle;
 

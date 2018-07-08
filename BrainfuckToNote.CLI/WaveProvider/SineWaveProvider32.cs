@@ -3,7 +3,7 @@ using System;
 
 namespace BrainfuckToNote
 {
-	public class SineWaveProvider32 : WaveProvider32
+	public class SineWaveProvider32 : WaveProvider32, ISampleProvider
 	{
 		double phaseAngle;
 

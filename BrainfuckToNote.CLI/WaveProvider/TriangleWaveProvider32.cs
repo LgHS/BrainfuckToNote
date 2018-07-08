@@ -3,7 +3,7 @@ using System;
 
 namespace BrainfuckToNote
 {
-	public class TriangleWaveProvider32 : WaveProvider32
+	public class TriangleWaveProvider32 : WaveProvider32, ISampleProvider
 	{
 		double phaseAngle;
 
