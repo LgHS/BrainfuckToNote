@@ -16,25 +16,44 @@ namespace BrainfuckToNote
 		triangle
 	}
 
-	class Synth
+	class SynthRecorder
 	{
 
 		string outFile = "@export2.wav";
-		MixingSampleProvider mixer;
-		WaveRecorder recorder;
+		public MixingSampleProvider mixer { get; private set; }
+		public WaveRecorder recorder { get; private set; }
+		public VolumeSampleProvider volumeSampleProvider { get; private set; }
+
+		public SynthRecorder(List<ISampleProvider> synth)
+		{
+
+			mixer = new MixingSampleProvider(synth);
+			mixer.ReadFully = true;
+
+			recorder = new WaveRecorder(mixer.ToWaveProvider(), "@test.wav");
+
+			volumeSampleProvider = new VolumeSampleProvider(mixer);
+			volumeSampleProvider.Volume = 1.0f;
+		}
+	}
+
+	class Synth
+	{
+		SynthRecorder recorder;
+
 		private WaveOut sineOut = new WaveOut();
 		private WaveOut sawOut = new WaveOut();
 		private WaveOut triangleOut = new WaveOut();
 		private WaveOut squareOut = new WaveOut();
 
-		SineWaveProvider32 sineWave = new SineWaveProvider32();
-		SawWaveProvider32 sawWave = new SawWaveProvider32();
-		SquareWaveProvider32 squareWave = new SquareWaveProvider32();
-		TriangleWaveProvider32 triangleWave = new TriangleWaveProvider32();
+		public SineWaveProvider32 sineWave = new SineWaveProvider32();
+		public SawWaveProvider32 sawWave = new SawWaveProvider32();
+		public SquareWaveProvider32 squareWave = new SquareWaveProvider32();
+		public TriangleWaveProvider32 triangleWave = new TriangleWaveProvider32();
 
 		float freq;
 		bool playing = false;
-		WaveType wave = WaveType.triangle;
+		WaveType wave = WaveType.sine;
 
 		~Synth()
 		{
@@ -42,18 +61,11 @@ namespace BrainfuckToNote
 
 		public Synth()
 		{
-			mixer = new MixingSampleProvider(new List<ISampleProvider> { sineWave.ToSampleProvider(), sawWave.ToSampleProvider(), squareWave.ToSampleProvider(), triangleWave.ToSampleProvider() });
-			recorder = new WaveRecorder(mixer.ToWaveProvider(), "@test.wav");
-			InitWaves();
-			mixer.ReadFully = true;
+		}
 
-			//WaveFormat waveFormat = new WaveFormat(mixer.WaveFormat.SampleRate, mixer.WaveFormat.BitsPerSample, mixer.WaveFormat.Channels);
-			//WaveFileWriter.CreateWaveFile(outFile, mixer.ToWaveProvider());
-
-			/*WaveFileWriter.CreateWaveFile(outFile, triangleWave);
-			WaveFileWriter.CreateWaveFile(outFile, sineWave);
-			WaveFileWriter.CreateWaveFile(outFile, sawWave);
-			WaveFileWriter.CreateWaveFile(outFile, squareWave);*/
+		public void SetRecorder(SynthRecorder recorder)
+		{
+			this.recorder = recorder;
 		}
 
 		public void SetSynthType(WaveType wave)
@@ -70,38 +82,7 @@ namespace BrainfuckToNote
 			playing = false;
 		}
 
-		public double GetFrequency(Note note)
-			{
-				if (note.Alteration == Alteration.Flat)
-				{
-					if (note.Pitch == Notes.Do) note.Pitch = Notes.Si;
-					else
-					{
-						note.Pitch -= 1;
-						note.Alteration = Alteration.Sharp;
-					}
-				}
-				List<string> notes = new List<string>() { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
-
-				string stringNote = String.Format("{0}{1}", note.Pitch, note.Alteration == Alteration.Sharp ? "#" : "");
-
-				int keyNumber = notes.IndexOf(stringNote);
-
-				if (keyNumber < 3)
-				{
-					keyNumber = keyNumber + 12 + ((note.Ocatve - 1) * 12) + 1;
-				}
-				else
-				{
-					keyNumber = keyNumber + ((note.Ocatve - 1) * 12) + 1;
-				}
-
-				double result = 440 * Math.Pow(2, (keyNumber - 49) / 12);
-
-				Console.WriteLine(result);
-
-				return result;
-			}
+		
 
 		public void PlayWave(double _frequency)
 		{
@@ -158,26 +139,29 @@ namespace BrainfuckToNote
 			sineWave.Frequency = (float)0;
 			sineWave.Amplitude = .9f;
 			sineOut.Init(sineWave);
-			sineOut.Init(recorder);
+			sineOut.Init(recorder.volumeSampleProvider);
+			sineOut.Init(recorder.recorder);
 
 			sawWave.SetWaveFormat(44100, 2);
 			sawWave.Frequency = (float)0;
 			sawWave.Amplitude = .3f;
 			sawOut.Init(sawWave);
-			sawOut.Init(recorder);
+			sawOut.Init(recorder.volumeSampleProvider);
+			sawOut.Init(recorder.recorder);
 
 			squareWave.SetWaveFormat(44100, 2);
 			squareWave.Frequency = (float)0;
 			squareWave.Amplitude = .3f;
 			squareOut.Init(squareWave);
-			squareOut.Init(recorder);
+			squareOut.Init(recorder.volumeSampleProvider);
+			squareOut.Init(recorder.recorder);
 
 			triangleWave.SetWaveFormat(44100, 2);
 			triangleWave.Frequency = (float)0;
-			triangleWave.Amplitude = 1f;
+			triangleWave.Amplitude = 1.0f;
 			triangleOut.Init(triangleWave);
-			triangleOut.Init(recorder);
-
+			triangleOut.Init(recorder.volumeSampleProvider);
+			triangleOut.Init(recorder.recorder);
 		}
 
 		public void SetFrequency(float _freq)

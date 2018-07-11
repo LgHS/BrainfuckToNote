@@ -1,24 +1,41 @@
 ﻿using BrainfuckToNote;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BrainfuckToNote
 {
 
+	class Harmony
+	{
+	}
+
 	class BrainfuckToMusicInterpreter
 	{
+		private const int APPCOMMAND_VOLUME_MUTE = 0x80000;
+		private const int WM_APPCOMMAND = 0x319;
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr SendMessageW(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
 		private static string VER = "0.0.0.1";
 		private static readonly int BUFSIZE = 65535;
 		private int[] buf = new int[BUFSIZE];
 		private int ptr { get; set; }
 		private bool echo { get; set; }
 
+		CachedSound kick;
+
 		public BrainfuckToMusicInterpreter()
 		{
 			this.ptr = 0;
 			this.Reset();
+			kick = new CachedSound("Kick 001 Apollo.wav");
 		}
 
 		public static void PrintHelp()
@@ -37,44 +54,104 @@ namespace BrainfuckToNote
 			Array.Clear(this.buf, 0, this.buf.Length);
 		}
 
-		public void Interpret(string s)
+		public Notes GetPitchA(string s, int i)
+		{
+			switch (s[i])
+			{
+				case '>':
+					return Notes.Do;
+				case '<':
+					return Notes.Re_Diese;
+				case '.':
+					return Notes.Sol;
+				case '+':
+					return Notes.Do;
+				case '-':
+					return Notes.Re_Diese;
+				case ',':
+					return Notes.Sol;
+				case '[':
+				case ']':
+				default:
+					return Notes.Do;
+			}
+		}
+
+		public Notes GetPitchB(string s, int i)
+		{
+			switch (s[i])
+			{
+				case '>':
+					return Notes.Do;
+				case '<':
+					return Notes.Fa;
+				case '.':
+					return Notes.Sol_Diese;
+				case '+':
+					return Notes.Do;
+				case '-':
+					return Notes.Fa;
+				case ',':
+					return Notes.Sol_Diese;
+				case '[':
+				case ']':
+				default:
+					return Notes.Do;
+			}
+		}
+
+		public Notes GetPitchC(string s, int i)
+		{
+			switch (s[i])
+			{
+				case '>':
+					return Notes.Si;
+				case '<':
+					return Notes.Re;
+				case '.':
+					return Notes.Fa;
+				case '+':
+					return Notes.Si;
+				case '-':
+					return Notes.Re;
+				case ',':
+					return Notes.Fa;
+				case '[':
+				case ']':
+				default:
+					return Notes.Si;
+			}
+		}
+
+		public List<Note> Parse(string s)
 		{
 			List<Note> notes = new List<Note>();
 			int i = 0;
+			int harmony = 0;
 			int right = s.Length;
 			Note note = new Note();
 			note.Ocatve = 3;
-			while (i < right)
+			while (i<right)
 			{
-				switch (s[i])
-				{
-					case '>':
-						note.Pitch = Notes.Do;
-						break;
-					case '<':
-						note.Pitch = Notes.Re;
-						break;
-					case '.':
-						note.Pitch = Notes.Mi;
-						break;
-					case '+':
-						note.Pitch = Notes.Fa;
-						break;
-					case '-':
-						note.Pitch = Notes.Sol;
-						break;
-					case ',':
-						note.Pitch = Notes.La;
-						break;
-					case '[':
-					case ']':
-						note.Pitch = Notes.Si;
-						break;
-				}
+				if(harmony % 4 == 0)
+					note.Pitch = GetPitchA(s, i);
+				if (harmony % 4 == 1)
+					note.Pitch = GetPitchB(s, i);
+				if (harmony % 4 == 2)
+					note.Pitch = GetPitchC(s, i);
+				if (harmony % 4 == 3)
+					note.Pitch = GetPitchA(s, i);
 
-				if(note.Ocatve < 8)
+				if (i % 16 == 0) harmony += 1;
+				if (harmony == 5) harmony = 0;
+
+				if (i > 0 && i < right - 1 && s[i] == s[i+1])
 					note.Ocatve += 1;
-						
+
+				if (note.Ocatve > 8)
+					note.Ocatve = 8;
+				if (note.Ocatve < 3)
+					note.Ocatve = 3;
 
 				if (i > 1 && s[i] != s[i - 1])
 				{
@@ -83,14 +160,40 @@ namespace BrainfuckToNote
 				}
 				i++;
 			}
+			return notes;
+		}
 
+		Stopwatch watch;
+
+		public void Interpret(string s)
+		{
+			var notes = Parse(s);
+			int i = 0;
+			watch = new Stopwatch();
+			
 			Synth synth = new Synth();
-			synth.SetSynthType(WaveType.square);
+
+			SynthRecorder recorer = new SynthRecorder(new List<ISampleProvider> { synth.sineWave.ToSampleProvider(), synth.sawWave.ToSampleProvider(), synth.squareWave.ToSampleProvider(), synth.triangleWave.ToSampleProvider() });
+
+			synth.SetRecorder(recorer);
+			synth.InitWaves();
+
+			synth.SetSynthType(WaveType.saw);
 			foreach (var n in notes)
 			{
-				Console.WriteLine("{0}{1}", n.Pitch, n.Ocatve);
-				synth.PlayWave(synth.GetFrequency(n));
-				Thread.Sleep(200);
+				watch.Start();
+				watch.Reset();		
+				Console.WriteLine("{0} - {1} - {2}", n.Pitch, n.Ocatve, n.GetFrequency());
+				synth.PlayWave(n.GetFrequency());
+				if (i % 4 == 0) AudioPlaybackEngine.Instance.PlaySound(kick);
+				i++;
+
+				watch.Stop();
+				if ((int)watch.ElapsedMilliseconds > 100) Debugger.Break();
+
+				int waitTime = 100 - (int)watch.ElapsedMilliseconds;
+
+				Thread.Sleep(waitTime);
 				synth.StopWave();
 			}
 		}
